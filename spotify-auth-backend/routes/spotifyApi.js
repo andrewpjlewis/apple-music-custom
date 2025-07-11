@@ -43,21 +43,25 @@ router.get('/playlists', async (req, res) => {
 
 // GET /spotify/albums
 router.get('/albums', async (req, res) => {
+  const accessToken = getAccessTokenFromHeaders(req);
+  if (!accessToken) return res.status(401).json({ error: 'Missing access token' });
+
   try {
     const response = await fetch('https://api.spotify.com/v1/me/albums', {
-      headers: { Authorization: `Bearer ${req.accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('Spotify Albums API error:', errorData);
       return res.status(response.status).json(errorData);
     }
 
     const data = await response.json();
     res.json(data);
-  } catch (err) {
-    console.error('Albums API Error:', err);
-    res.status(500).json({ error: 'Failed to fetch albums' });
+  } catch (error) {
+    console.error('Fetch /albums failed:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -83,26 +87,29 @@ router.get('/recently-played', async (req, res) => {
 
 // GET /spotify/currently-playing
 router.get('/currently-playing', async (req, res) => {
+  const accessToken = getAccessTokenFromHeaders(req);
+  if (!accessToken) return res.status(401).json({ error: 'Missing access token' });
+
   try {
     const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-      headers: { Authorization: `Bearer ${req.accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     if (response.status === 204) {
-      // No content currently playing
-      return res.status(204).send();
+      return res.status(204).send(); // No content currently playing
     }
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('Spotify Currently Playing API error:', errorData);
       return res.status(response.status).json(errorData);
     }
 
     const data = await response.json();
     res.json(data);
-  } catch (err) {
-    console.error('Currently Playing API Error:', err);
-    res.status(500).json({ error: 'Failed to fetch currently playing' });
+  } catch (error) {
+    console.error('Fetch /currently-playing failed:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

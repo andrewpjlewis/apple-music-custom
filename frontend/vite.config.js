@@ -5,8 +5,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/spotify': 'http://localhost:8888',
-      '/auth': 'http://localhost:8888'
+      '/spotify': 'https://apple-music-custom.onrender.com',
+      '/auth': 'https://apple-music-custom.onrender.com'
     }
   }
 })

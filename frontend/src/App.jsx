@@ -27,6 +27,21 @@ function App() {
     }
   }, [token]);
 
+  // Clear tokens on tab/window close or refresh
+  useEffect(() => {
+    const handleUnload = () => {
+      window.localStorage.removeItem('spotify_token');
+      // remove other tokens if you store them
+      // window.localStorage.removeItem('spotify_refresh_token');
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, []);
+
   const renderView = () => {
     if (query) return <SearchBar token={token} query={query} />;
     switch (view) {

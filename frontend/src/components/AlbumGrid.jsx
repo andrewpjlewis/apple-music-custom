@@ -11,6 +11,8 @@ export default function AlbumGrid({ token }) {
       .then(data => setAlbums(data.items || []));
   }, [token]);
 
+  console.log(token)
+
   const handlePlay = (context_uri) => {
     fetch('/spotify/play', {
       method: 'PUT',

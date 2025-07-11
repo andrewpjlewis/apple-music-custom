@@ -6,6 +6,7 @@ import RecentGrid from './components/RecentGrid';
 import SearchBar from './components/SearchBar';
 import NowPlayingBar from './components/NowPlayingBar';
 import Login from './components/Login';
+import Logout from './components/Logout';
 
 function App() {
   const [view, setView] = useState('albums');
@@ -63,7 +64,10 @@ function App() {
       <Sidebar onSelect={setView} onSearch={setQuery} />
       <main>
         {renderView()}
-        <NowPlayingBar token={token} />
+        <div className="flex justify-between items-center p-2">
+          <NowPlayingBar token={token} />
+          <Logout />
+        </div>
       </main>
     </div>
   );

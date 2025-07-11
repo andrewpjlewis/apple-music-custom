@@ -5,8 +5,16 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/spotify': 'https://apple-music-custom.onrender.com',
-      '/auth': 'https://apple-music-custom.onrender.com'
+      '/spotify': {
+        target: 'https://apple-music-custom.onrender.com',
+        changeOrigin: true,
+        secure: true,
+      },
+      '/auth': {
+        target: 'https://apple-music-custom.onrender.com',
+        changeOrigin: true,
+        secure: true,
+      }
     }
   }
 })

@@ -22,4 +22,10 @@ router.get('/user', (req, res) => {
   }
 });
 
+router.post('/logout', (req, res) => {
+  req.logout(() => {
+    res.json({ message: 'Logged out successfully' });
+  });
+});
+
 module.exports = router;

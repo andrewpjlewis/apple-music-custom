@@ -1,7 +1,7 @@
 const express = require('express');
 const querystring = require('querystring');
 const axios = require('axios');
-const { generateRandomString } = require('../utils/spotifyUtils'); // your existing helper
+const { generateRandomString } = require('../utils/spotifyUtils'); // Your helper function
 const router = express.Router();
 
 const {
@@ -30,7 +30,7 @@ router.get('/login', (req, res) => {
   ].join(' ');
 
   const queryParams = querystring.stringify({
-    response_type: 'code',        // Use code flow!
+    response_type: 'code',
     client_id: CLIENT_ID,
     scope,
     redirect_uri: REDIRECT_URI,
@@ -42,12 +42,7 @@ router.get('/login', (req, res) => {
 
 router.get('/callback', async (req, res) => {
   const code = req.query.code || null;
-  if (!code) {
-    return res.status(400).send('No code provided');
-  }
-
-  console.log('Using redirect_uri:', REDIRECT_URI);
-  console.log('Received code:', code);
+  if (!code) return res.status(400).send('No code provided');
 
   try {
     const tokenResponse = await axios({
@@ -79,18 +74,14 @@ router.get('/callback', async (req, res) => {
       message: error.message,
       responseData: error.response?.data,
       status: error.response?.status,
-      headers: error.response?.headers,
     });
     res.status(500).send('Error retrieving Spotify tokens');
   }
 });
 
-
 router.get('/refresh_token', async (req, res) => {
   const refresh_token = req.query.refresh_token;
-  if (!refresh_token) {
-    return res.status(400).send('Missing refresh_token');
-  }
+  if (!refresh_token) return res.status(400).send('Missing refresh_token');
 
   try {
     const refreshResponse = await axios({
@@ -118,6 +109,10 @@ router.get('/refresh_token', async (req, res) => {
 router.put('/play', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   const { uris, context_uri } = req.body;
+
+  if (!uris && !context_uri) {
+    return res.status(400).json({ error: 'Missing uris or context_uri in request body' });
+  }
 
   try {
     await axios.put(

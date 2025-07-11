@@ -72,8 +72,13 @@ router.get('/callback', async (req, res) => {
 
     res.redirect(`${FRONTEND_URI}/#${queryParams}`);
   } catch (error) {
-    console.error('Spotify Token Error:', error.response?.data || error.message);
-    res.status(500).send('Error retrieving Spotify tokens');
+      console.error('Spotify Token Error:', {
+    message: error.message,
+    responseData: error.response?.data,
+    status: error.response?.status,
+    headers: error.response?.headers,
+  });
+  res.status(500).send('Error retrieving Spotify tokens');
   }
 });
 
@@ -123,6 +128,7 @@ router.put('/play', async (req, res) => {
     );
     res.status(204).send();
   } catch (err) {
+    console.error('Play API Error:', err.response?.data || err.message);
     res.status(500).json({ error: err.message });
   }
 });

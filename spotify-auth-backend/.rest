@@ -1,0 +1,21 @@
+# Test Spotify Playlists (replace YOUR_ACCESS_TOKEN)
+GET http://localhost:8888/spotify/playlists
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+###
+
+# Test Spotify Albums
+GET http://localhost:8888/spotify/albums
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+###
+
+# Test Recently Played
+GET http://localhost:8888/spotify/recently-played
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+###
+
+# Test Google Auth user info (needs session cookie)
+GET http://localhost:8888/auth/user
+Cookie: connect.sid=YOUR_SESSION_COOKIE

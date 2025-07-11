@@ -11,10 +11,21 @@ export default function RecentGrid({ token }) {
       .then(data => setRecent(data.items || []));
   }, [token]);
 
+  const handlePlay = (uri) => {
+    fetch('/spotify/play', {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ uris: [uri] }),
+    });
+  };
+
   return (
     <div className="grid">
       {recent.map(({ track }, i) => (
-        <div className="card" key={i}>
+        <div className="card cursor-pointer" key={i} onClick={() => handlePlay(track.uri)}>
           <img src={track.album.images[0]?.url} alt={track.name} />
           <div>{track.name}</div>
           <div className="subtext">{track.artists[0].name}</div>

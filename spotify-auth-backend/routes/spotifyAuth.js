@@ -104,4 +104,26 @@ router.get('/refresh_token', async (req, res) => {
   }
 });
 
+// PUT /spotify/play
+router.put('/play', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  const { uris, context_uri } = req.body;
+
+  try {
+    await fetch('https://api.spotify.com/v1/me/player/play', {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(
+        uris ? { uris } : { context_uri }
+      ),
+    });
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

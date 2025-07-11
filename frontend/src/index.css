@@ -60,3 +60,38 @@ main {
   font-size: 0.8em;
   color: #aaa;
 }
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ios-style-btn {
+  background-color: #007aff; /* iOS system blue */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  box-shadow:
+    0 2px 8px rgba(0, 122, 255, 0.4),
+    inset 0 -2px 0 rgba(0, 82, 217, 0.7);
+  transition: background-color 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+}
+
+.ios-style-btn:hover {
+  background-color: #005fcc;
+  box-shadow:
+    0 4px 12px rgba(0, 122, 255, 0.6),
+    inset 0 -2px 0 rgba(0, 82, 217, 0.8);
+}
+
+.ios-style-btn:active {
+  background-color: #004bb5;
+  box-shadow:
+    0 1px 6px rgba(0, 122, 255, 0.8),
+    inset 0 2px 4px rgba(0, 82, 217, 0.9);
+  transform: translateY(1px);
+}

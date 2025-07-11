@@ -1,7 +1,7 @@
 const express = require('express');
 const querystring = require('querystring');
 const axios = require('axios');
-const { generateRandomString } = require('../utils/spotifyUtils');
+const { generateRandomString } = require('../utils/spotifyUtils'); // your existing helper
 const router = express.Router();
 
 const {
@@ -29,7 +29,7 @@ router.get('/login', (req, res) => {
   ].join(' ');
 
   const queryParams = querystring.stringify({
-    response_type: 'code',
+    response_type: 'code',        // Use code flow!
     client_id: CLIENT_ID,
     scope,
     redirect_uri: REDIRECT_URI,
@@ -41,7 +41,6 @@ router.get('/login', (req, res) => {
 
 router.get('/callback', async (req, res) => {
   const code = req.query.code || null;
-
   if (!code) {
     return res.status(400).send('No code provided');
   }
@@ -57,12 +56,14 @@ router.get('/callback', async (req, res) => {
       }),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: 'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
+        Authorization:
+          'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
       },
     });
 
     const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
+    // Redirect to frontend app with tokens in hash params for client to read
     const queryParams = querystring.stringify({
       access_token,
       refresh_token,
@@ -78,7 +79,6 @@ router.get('/callback', async (req, res) => {
 
 router.get('/refresh_token', async (req, res) => {
   const refresh_token = req.query.refresh_token;
-
   if (!refresh_token) {
     return res.status(400).send('Missing refresh_token');
   }
@@ -93,7 +93,8 @@ router.get('/refresh_token', async (req, res) => {
       }),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: 'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
+        Authorization:
+          'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
       },
     });
 
@@ -104,22 +105,22 @@ router.get('/refresh_token', async (req, res) => {
   }
 });
 
-// PUT /spotify/play
+// PUT /spotify/play - play a track or context on user’s device
 router.put('/play', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   const { uris, context_uri } = req.body;
 
   try {
-    await fetch('https://api.spotify.com/v1/me/player/play', {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(
-        uris ? { uris } : { context_uri }
-      ),
-    });
+    await axios.put(
+      'https://api.spotify.com/v1/me/player/play',
+      uris ? { uris } : { context_uri },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch'); // If using node v18+, global fetch is available.
+const fetch = require('node-fetch'); // Or global fetch if using node >=18
 
 function getAccessTokenFromHeaders(req) {
   const auth = req.headers.authorization || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-  return token;
+  return auth.startsWith('Bearer ') ? auth.slice(7) : null;
 }
 
 router.get('/playlists', async (req, res) => {

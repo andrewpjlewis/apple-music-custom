@@ -7,9 +7,10 @@ const router = express.Router();
 const {
   CLIENT_ID,
   CLIENT_SECRET,
-  REDIRECT_URI,
   FRONTEND_URI,
 } = process.env;
+
+const REDIRECT_URI = 'https://apple-music-custom.onrender.com/callback';
 
 router.get('/login', (req, res) => {
   const state = generateRandomString(16);
@@ -45,6 +46,9 @@ router.get('/callback', async (req, res) => {
     return res.status(400).send('No code provided');
   }
 
+  console.log('Using redirect_uri:', REDIRECT_URI);
+  console.log('Received code:', code);
+
   try {
     const tokenResponse = await axios({
       method: 'post',
@@ -63,7 +67,6 @@ router.get('/callback', async (req, res) => {
 
     const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
-    // Redirect to frontend app with tokens in hash params for client to read
     const queryParams = querystring.stringify({
       access_token,
       refresh_token,
@@ -72,15 +75,16 @@ router.get('/callback', async (req, res) => {
 
     res.redirect(`${FRONTEND_URI}/#${queryParams}`);
   } catch (error) {
-      console.error('Spotify Token Error:', {
-    message: error.message,
-    responseData: error.response?.data,
-    status: error.response?.status,
-    headers: error.response?.headers,
-  });
-  res.status(500).send('Error retrieving Spotify tokens');
+    console.error('Spotify Token Error:', {
+      message: error.message,
+      responseData: error.response?.data,
+      status: error.response?.status,
+      headers: error.response?.headers,
+    });
+    res.status(500).send('Error retrieving Spotify tokens');
   }
 });
+
 
 router.get('/refresh_token', async (req, res) => {
   const refresh_token = req.query.refresh_token;

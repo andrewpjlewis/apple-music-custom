@@ -5,6 +5,7 @@ export default function Login() {
   const RESPONSE_TYPE = 'code';
 
   const SCOPES = [
+    'streaming',
     'user-read-playback-state',
     'user-read-currently-playing',
     'user-read-recently-played',
@@ -36,7 +37,7 @@ export default function Login() {
         </p>
         <p className="intro-links">
           GitHub: <a href="https://github.com/andrewpjlewis/apple-music-custom">github.com/andrewpjlewis/apple-music-custom</a><br />
-          Portfolio: <a href="https://yourportfolio.com" target="_blank" rel="noopener noreferrer">yourportfolio.com</a>
+          Portfolio: <a href="https://mern-portfolio-hky9.onrender.com/" target="_blank" rel="noopener noreferrer">https://mern-portfolio-hky9.onrender.com/</a>
         </p>
       </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, Shuffle } from 'lucide-react';
 
 export default function NowPlayingBar({ token, refreshTrigger }) {
@@ -7,18 +7,31 @@ export default function NowPlayingBar({ token, refreshTrigger }) {
   const [volume, setVolume] = useState(50);
   const [isShuffling, setIsShuffling] = useState(false);
 
-  const fetchCurrentTrack = () => {
-    fetch('/spotify/currently-playing', {
+  const ignoreShuffleUpdateRef = useRef(false);
+
+  const fetchPlayerState = () => {
+    fetch('/spotify/player-state', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => (res.status === 204 ? null : res.json()))
       .then(data => {
-        setTrack(data?.item || null);
-        setIsPlaying(data?.is_playing || false);
-        setIsShuffling(data?.shuffle_state || false);
+        console.log("Player data:", data);
+        if (!data) {
+          setTrack(null);
+          setIsPlaying(false);
+          setIsShuffling(false);
+          return;
+        }
+
+        setTrack(data.item || null);
+        setIsPlaying(data.is_playing || false);
+
+        if (!ignoreShuffleUpdateRef.current) {
+          setIsShuffling(data.shuffle_state || false);
+        }
       })
       .catch(err => {
-        console.error('Failed to fetch currently playing:', err);
+        console.error('Failed to fetch player state:', err);
         setTrack(null);
         setIsPlaying(false);
         setIsShuffling(false);
@@ -26,14 +39,12 @@ export default function NowPlayingBar({ token, refreshTrigger }) {
   };
 
   useEffect(() => {
-    fetchCurrentTrack();
-    const interval = setInterval(fetchCurrentTrack, 5000);
-    return () => clearInterval(interval);
+    fetchPlayerState(); // Only on mount
   }, [token]);
 
   useEffect(() => {
     if (refreshTrigger !== undefined) {
-      fetchCurrentTrack();
+      fetchPlayerState(); // When refreshTrigger changes
     }
   }, [refreshTrigger]);
 
@@ -42,33 +53,43 @@ export default function NowPlayingBar({ token, refreshTrigger }) {
     fetch(`/spotify/${endpoint}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
-    }).then(() => setIsPlaying(!isPlaying));
+    }).then(() => {
+      setIsPlaying(!isPlaying);
+      fetchPlayerState(); // Refresh state after toggling
+    });
   };
 
   const skipToNext = () => {
     fetch('/spotify/next', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-    }).then(fetchCurrentTrack);
+    }).then(fetchPlayerState);
   };
 
   const skipToPrevious = () => {
     fetch('/spotify/previous', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-    }).then(fetchCurrentTrack);
+    }).then(fetchPlayerState);
   };
 
   const toggleShuffle = () => {
     const newState = !isShuffling;
-    setIsShuffling(newState);
     fetch(`/spotify/shuffle?state=${newState}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` },
-    }).catch(err => {
-      console.error('Failed to toggle shuffle:', err);
-      setIsShuffling(!newState);
-    });
+    })
+      .then(() => {
+        setIsShuffling(newState);
+        ignoreShuffleUpdateRef.current = true;
+        setTimeout(() => {
+          ignoreShuffleUpdateRef.current = false;
+          fetchPlayerState();
+        }, 5000);
+      })
+      .catch(err => {
+        console.error('Failed to toggle shuffle:', err);
+      });
   };
 
   const changeVolume = (e) => {

@@ -90,25 +90,6 @@ router.get('/recently-played', async (req, res) => {
   }
 });
 
-router.get('/currently-playing', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-      headers: { Authorization: `Bearer ${req.accessToken}` },
-    });
-    if (response.status === 204) return res.status(204).send();
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error('Spotify Currently Playing API error:', errData);
-      return res.status(response.status).json(errData);
-    }
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error('Fetch /currently-playing failed:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 router.put('/play', async (req, res) => {
   try {
     const response = await fetch('https://api.spotify.com/v1/me/player/play', {
@@ -194,12 +175,11 @@ router.put('/volume', async (req, res) => {
 
 router.put('/shuffle', async (req, res) => {
   const { state } = req.query;
-  const token = req.headers.authorization?.split(' ')[1];
   try {
     const response = await fetch(`https://api.spotify.com/v1/me/player/shuffle?state=${state}`, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${req.accessToken}`, // use the middleware token
       },
     });
     if (response.status === 204) {
@@ -210,6 +190,30 @@ router.put('/shuffle', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/player-state', async (req, res) => {
+  try {
+    const response = await fetch('https://api.spotify.com/v1/me/player', {
+      headers: {
+        Authorization: `Bearer ${req.accessToken}`,
+      },
+    });
+    if (response.status === 204) {
+      // No content means no active playback
+      return res.status(204).send();
+    }
+    if (!response.ok) {
+      const errData = await response.json();
+      console.error('Spotify Player State API error:', errData);
+      return res.status(response.status).json(errData);
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Fetch /player-state failed:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

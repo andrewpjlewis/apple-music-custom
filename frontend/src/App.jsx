@@ -6,7 +6,6 @@ import RecentGrid from './components/RecentGrid';
 import SearchBar from './components/SearchBar';
 import NowPlayingBar from './components/NowPlayingBar';
 import Login from './components/Login';
-import Logout from './components/Logout';
 import SpotifyPlayerSDK from './components/SpotifyPlayerSDK';
 
 function App() {

@@ -9,7 +9,7 @@
   --color-hover-bg: #3A3A3A;       /* Hover background */
   --color-volume-track: #404040;   /* Volume slider background */
   --color-now-playing-shadow: rgba(0, 0, 0, 0.8); /* Shadow */
-  --color-accent-hover: #a128d1;
+  --color-accent-hover: #9F2BCC;
 }
 
 /* Reset and base */
@@ -175,7 +175,7 @@ body {
 }
 
 .ios-style-btn:hover {
-  background-color: #7e3fb7; /* Slightly darker accent */
+  background-color: var(--color-accent-hover); /* Slightly darker accent */
   box-shadow:
     0 4px 12px rgba(155, 89, 182, 0.6),
     inset 0 -2px 0 rgba(125, 54, 160, 0.8);
@@ -330,7 +330,7 @@ body {
 }
 
 .now-playing-bar .volume-control input[type="range"]:hover::-webkit-slider-thumb {
-  background: #a569d8; /* lighter purple hover */
+  background: var(--color-accent);
 }
 
 /* Firefox */
@@ -347,7 +347,7 @@ body {
   position: fixed;
   top: 16px;
   left: 16px;
-  z-index: 10001; /* above sidebar */
+  z-index: 10001;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -381,7 +381,7 @@ body {
   width: 240px;
   height: 100vh;
   background: linear-gradient(180deg, #121212 0%, #181818 100%);
-  color: #fff;
+  color: var(--color-text-light);
   display: flex;
   flex-direction: column;
   padding: 24px;
@@ -391,6 +391,35 @@ body {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10000;
   user-select: none;
+}
+
+.sidebar-list {
+  flex-grow: 1;
+  list-style-type: none;
+  padding-left: 20px;
+}
+
+.sidebar-logout-btn {
+  width: 100%;
+  margin: 16px 0;
+  padding: 4px 16px;
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.sidebar-logout-btn:hover {
+  background-color: var(--color-accent-hover);
+  transform: translateY(-1px);
+}
+
+.sidebar-logout-btn:active {
+  background-color: #642e91;
+  transform: translateY(0);
 }
 
 /* Sidebar open state */

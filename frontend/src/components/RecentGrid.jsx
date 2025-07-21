@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export default function RecentGrid({ token }) {
+export default function RecentGrid({ token, onTrackPlay }) {
   const [recent, setRecent] = useState([]);
 
   useEffect(() => {
@@ -19,16 +19,25 @@ export default function RecentGrid({ token }) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ uris: [uri] }),
+    }).then(() => {
+      if (onTrackPlay) onTrackPlay();
     });
   };
 
   return (
-    <div className="grid">
+    <div className="grid-container">
       {recent.map(({ track }, i) => (
-        <div className="card cursor-pointer" key={i} onClick={() => handlePlay(track.uri)}>
-          <img src={track.album.images[0]?.url} alt={track.name} />
-          <div>{track.name}</div>
-          <div className="subtext">{track.artists[0].name}</div>
+        <div
+          className="grid-card"
+          key={i}
+          onClick={() => handlePlay(track.uri)}
+          role="button"
+          tabIndex={0}
+          onKeyPress={e => { if (e.key === 'Enter') handlePlay(track.uri); }}
+        >
+          <img src={track.album.images[0]?.url} alt={track.name} className="grid-image" />
+          <div className="grid-title">{track.name}</div>
+          <div className="grid-subtitle">{track.artists[0].name}</div>
         </div>
       ))}
     </div>

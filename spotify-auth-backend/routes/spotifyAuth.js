@@ -15,6 +15,7 @@ const REDIRECT_URI = 'https://apple-music-custom.onrender.com/callback';
 router.get('/login', (req, res) => {
   const state = generateRandomString(16);
   const scope = [
+    'streaming', 
     'user-read-private',
     'user-read-email',
     'user-read-playback-state',

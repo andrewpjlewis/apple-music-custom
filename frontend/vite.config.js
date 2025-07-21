@@ -6,15 +6,15 @@ export default defineConfig({
   server: {
     proxy: {
       '/spotify': {
-        target: 'https://apple-music-custom.onrender.com',
+        target: 'http://localhost:8888',
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
       '/auth': {
-        target: 'https://apple-music-custom.onrender.com',
+        target: 'http://localhost:8888',
         changeOrigin: true,
-        secure: true,
-      }
-    }
-  }
+        secure: false,
+      },
+    },
+  },
 })

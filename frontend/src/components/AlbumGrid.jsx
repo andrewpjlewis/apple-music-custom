@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export default function AlbumGrid({ token }) {
+export default function AlbumGrid({ token, onTrackPlay }) {
   const [albums, setAlbums] = useState([]);
 
   useEffect(() => {
@@ -19,20 +19,25 @@ export default function AlbumGrid({ token }) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ context_uri }),
+    }).then(() => {
+      if (onTrackPlay) onTrackPlay();
     });
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+    <div className="grid-container">
       {albums.map(({ album }) => (
         <div
           key={album.id}
-          className="bg-gray-800 text-white rounded p-2 cursor-pointer"
+          className="grid-card"
           onClick={() => handlePlay(album.uri)}
+          role="button"
+          tabIndex={0}
+          onKeyPress={e => { if (e.key === 'Enter') handlePlay(album.uri); }}
         >
-          <img src={album.images[0]?.url} alt={album.name} className="rounded" />
-          <div className="mt-2 text-sm">{album.name}</div>
-          <div className="text-xs text-gray-400">{album.artists[0].name}</div>
+          <img src={album.images[0]?.url} alt={album.name} className="grid-image" />
+          <div className="grid-title">{album.name}</div>
+          <div className="grid-subtitle">{album.artists[0]?.name || ''}</div>
         </div>
       ))}
     </div>

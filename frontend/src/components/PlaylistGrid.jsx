@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import PlaylistTracks from './PlaylistTracks';
 
-export default function PlaylistGrid({ token }) {
+export default function PlaylistGrid({ token, onTrackPlay }) {  // Accept onTrackPlay here
   const [playlists, setPlaylists] = useState([]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
   useEffect(() => {
     fetch('/spotify/playlists', {
@@ -11,28 +13,25 @@ export default function PlaylistGrid({ token }) {
       .then(data => setPlaylists(data.items || []));
   }, [token]);
 
-  const handlePlay = (context_uri) => {
-    fetch('/spotify/play', {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ context_uri }),
-    });
-  };
+  if (selectedPlaylist) {
+    // Pass onTrackPlay down to PlaylistTracks
+    return <PlaylistTracks token={token} playlist={selectedPlaylist} onTrackPlay={onTrackPlay} />;
+  }
 
   return (
-    <div className="grid">
+    <div className="grid-container">
       {playlists.map(playlist => (
         <div
-          className="card cursor-pointer"
           key={playlist.id}
-          onClick={() => handlePlay(playlist.uri)}
+          className="grid-card"
+          onClick={() => setSelectedPlaylist(playlist)}
+          role="button"
+          tabIndex={0}
+          onKeyPress={e => { if (e.key === 'Enter') setSelectedPlaylist(playlist); }}
         >
-          <img src={playlist.images[0]?.url} alt={playlist.name} />
-          <div>{playlist.name}</div>
-          <div className="subtext">{playlist.owner.display_name}</div>
+          <img src={playlist.images[0]?.url} alt={playlist.name} className="grid-image" />
+          <div className="grid-title">{playlist.name}</div>
+          <div className="grid-subtitle">{playlist.owner.display_name || ''}</div>
         </div>
       ))}
     </div>

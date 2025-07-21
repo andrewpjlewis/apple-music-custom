@@ -1,18 +1,60 @@
-export default function Sidebar({ onSelect, onSearch }) {
+import { useState } from 'react';
+import Logout from './Logout';
+
+export default function Sidebar({ onSelect, onSearch, setToken }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close sidebar on selection (optional)
+  const handleSelect = (view) => {
+    onSearch('');
+    onSelect(view);
+    setMobileOpen(false);
+  };
+
   return (
-    <div className="w-60 bg-black text-white h-screen p-4 hidden md:block">
-      <h2 className="text-xl font-bold mb-4">Library</h2>
-      <input
-        type="text"
-        placeholder="Search..."
-        className="w-full p-2 mb-4 rounded bg-gray-700 text-white"
-        onChange={e => onSearch(e.target.value)}
+    <>
+      {/* Hamburger button, visible only on mobile */}
+      <button
+        aria-label="Toggle menu"
+        className={`hamburger-btn ${mobileOpen ? 'open' : ''}`}
+        onClick={() => setMobileOpen(prev => !prev)}
+      >
+        <span className="hamburger-line top" />
+        <span className="hamburger-line middle" />
+        <span className="hamburger-line bottom" />
+      </button>
+
+      {/* Backdrop, shown only when menu is open */}
+      <div
+        className={`sidebar-backdrop ${mobileOpen ? 'visible' : ''}`}
+        onClick={() => setMobileOpen(false)}
       />
-      <ul className="space-y-2">
-        <li onClick={() => { onSearch(''); onSelect('playlists'); }} className="cursor-pointer hover:text-green-400">Playlists</li>
-        <li onClick={() => { onSearch(''); onSelect('albums'); }} className="cursor-pointer hover:text-green-400">Albums</li>
-        <li onClick={() => { onSearch(''); onSelect('recent'); }} className="cursor-pointer hover:text-green-400">Recently Played</li>
-      </ul>
-    </div>
+
+      <nav className={`sidebar ${mobileOpen ? 'open' : ''}`}>
+        <h2 className="sidebar-title">Library</h2>
+        <input
+          type="text"
+          placeholder="Search..."
+          className="sidebar-search"
+          onChange={e => onSearch(e.target.value)}
+        />
+        <ul className="sidebar-list">
+          <li onClick={() => handleSelect('playlists')} className="sidebar-list-item">
+            Playlists
+          </li>
+          <li onClick={() => handleSelect('albums')} className="sidebar-list-item">
+            Albums
+          </li>
+          <li onClick={() => handleSelect('recent')} className="sidebar-list-item">
+            Recently Played
+          </li>
+          <li>
+            <div className="sidebar-logout">
+              <Logout setToken={setToken} />
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </>
   );
 }

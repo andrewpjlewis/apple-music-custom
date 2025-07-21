@@ -1,15 +1,16 @@
 import React from 'react';
 
-export default function Logout() {
+export default function Logout({ setToken }) {
   const handleLogout = async () => {
     try {
       const res = await fetch('/auth/logout', {
         method: 'POST',
-        credentials: 'include', // send cookies/session info
+        credentials: 'include',
       });
       if (res.ok) {
-        // After logout, redirect or refresh app state
-        window.location.href = '/'; // redirect to homepage
+        setToken('');
+        window.localStorage.removeItem('spotify_token');
+        window.location.href = '/';
       } else {
         console.error('Logout failed');
       }

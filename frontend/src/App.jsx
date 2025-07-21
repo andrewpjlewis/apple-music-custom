@@ -14,8 +14,6 @@ function App() {
   const [token, setToken] = useState('');
   const [query, setQuery] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
-
-  // This counter increments to trigger NowPlayingBar refresh
   const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
@@ -25,21 +23,13 @@ function App() {
       if (tokenFromHash) {
         setToken(tokenFromHash);
         window.localStorage.setItem('spotify_token', tokenFromHash);
-        window.location.hash = '';
+        window.location.hash = ''; // clear hash once token extracted
       }
     } else {
       const storedToken = window.localStorage.getItem('spotify_token');
       if (storedToken) setToken(storedToken);
     }
   }, [token]);
-
-  useEffect(() => {
-    const handleUnload = () => {
-      window.localStorage.removeItem('spotify_token');
-    };
-    window.addEventListener('beforeunload', handleUnload);
-    return () => window.removeEventListener('beforeunload', handleUnload);
-  }, []);
 
   useEffect(() => {
     if (!token) return;
@@ -59,10 +49,9 @@ function App() {
       });
   }, [token]);
 
-  // Called when RecentGrid plays a track
   const handleTrackPlay = () => {
     setRefreshCounter(prev => prev + 1);
-    setIsPlaying(true); // Optionally update isPlaying immediately
+    setIsPlaying(true);
   };
 
   const renderView = () => {
@@ -82,20 +71,17 @@ function App() {
   if (!token) return <Login />;
 
   return (
-    <div className="app">
-      <Sidebar onSelect={setView} onSearch={setQuery} />
-      <main>
+    <div className="app-container">
+      <Sidebar onSelect={setView} onSearch={setQuery} setToken={setToken}>
+      </Sidebar>
+      <main className="main-content">
         {renderView()}
-        <div className="p-2">
-          <Logout />
-        </div>
       </main>
 
       {isPlaying && (
         <NowPlayingBar token={token} refreshTrigger={refreshCounter} />
       )}
 
-      {/* Spotify Web Playback SDK Component */}
       {token && (
         <SpotifyPlayerSDK token={token} setRefreshTrigger={setRefreshCounter} />
       )}

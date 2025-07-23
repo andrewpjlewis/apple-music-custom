@@ -8,12 +8,12 @@ export default defineConfig({
       '/spotify': {
         target: 'https://apple-music-custom.onrender.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
       '/auth': {
         target: 'https://apple-music-custom.onrender.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
       },
     },
   },

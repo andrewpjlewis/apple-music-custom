@@ -4,7 +4,7 @@ export default function AlbumGrid({ token, onTrackPlay }) {
   const [albums, setAlbums] = useState([]);
 
   useEffect(() => {
-    fetch('https://apple-music-custom.onrender.com/spotify/albums', {
+    fetch('/albums', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -12,7 +12,7 @@ export default function AlbumGrid({ token, onTrackPlay }) {
   }, [token]);
 
   const handlePlay = (context_uri) => {
-    fetch('https://apple-music-custom.onrender.com/spotify/play', {
+    fetch('/play', {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,

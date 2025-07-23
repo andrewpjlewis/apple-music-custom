@@ -1,21 +1,18 @@
 import { useEffect, useState } from 'react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
 export default function AlbumGrid({ token, onTrackPlay }) {
   const [albums, setAlbums] = useState([]);
 
   useEffect(() => {
-    fetch(`${BACKEND_URL}/spotify/albums`, {
+    fetch('https://apple-music-custom.onrender.com/spotify/albums', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
-      .then(data => setAlbums(data.items || []))
-      .catch(err => console.error('Error loading albums:', err));
+      .then(data => setAlbums(data.items || []));
   }, [token]);
 
   const handlePlay = (context_uri) => {
-    fetch(`${BACKEND_URL}/spotify/play`, {
+    fetch('https://apple-music-custom.onrender.com/spotify/play', {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -24,7 +21,7 @@ export default function AlbumGrid({ token, onTrackPlay }) {
       body: JSON.stringify({ context_uri }),
     }).then(() => {
       if (onTrackPlay) onTrackPlay();
-    }).catch(err => console.error('Error playing track:', err));
+    });
   };
 
   return (

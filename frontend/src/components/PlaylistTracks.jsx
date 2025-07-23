@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../api';
 
 export default function PlaylistTracks({ token, playlist, onTrackPlay }) {
   const [tracks, setTracks] = useState([]);
 
   useEffect(() => {
-    fetch(`/spotify/playlists/${playlist.id}/tracks`, {
+    fetch(`${API_BASE_URL}/spotify/playlists/${playlist.id}/tracks`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -12,7 +13,7 @@ export default function PlaylistTracks({ token, playlist, onTrackPlay }) {
   }, [playlist.id, token]);
 
   const playTrack = (uri) => {
-    fetch('/spotify/play', {
+    fetch(`${API_BASE_URL}/spotify/play`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -25,7 +26,7 @@ export default function PlaylistTracks({ token, playlist, onTrackPlay }) {
   };
 
   const playPlaylist = () => {
-    fetch('/spotify/play', {
+    fetch(`${API_BASE_URL}/spotify/play`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -39,7 +40,7 @@ export default function PlaylistTracks({ token, playlist, onTrackPlay }) {
 
   // Fisher-Yates shuffle
   const shuffleArray = (array) => {
-    const arr = array.slice(); // copy array
+    const arr = array.slice();
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -51,7 +52,7 @@ export default function PlaylistTracks({ token, playlist, onTrackPlay }) {
     const shuffledTracks = shuffleArray(tracks);
     const uris = shuffledTracks.map(t => t.track.uri);
 
-    fetch('/spotify/play', {
+    fetch(`${API_BASE_URL}/spotify/play`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,

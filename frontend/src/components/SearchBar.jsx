@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../api';
 
 export default function SearchBar({ token, query }) {
   const [results, setResults] = useState([]);
 
   useEffect(() => {
     if (!query) return;
-    fetch(`/spotify/search?q=${encodeURIComponent(query)}`, {
+    fetch(`${API_BASE_URL}/spotify/search?q=${encodeURIComponent(query)}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())

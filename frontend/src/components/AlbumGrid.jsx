@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../api';
 
 export default function AlbumGrid({ token, onTrackPlay }) {
   const [albums, setAlbums] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/spotify/albums`, {
+    fetch('/spotify/albums', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -13,7 +12,7 @@ export default function AlbumGrid({ token, onTrackPlay }) {
   }, [token]);
 
   const handlePlay = (context_uri) => {
-    fetch(`${API_BASE_URL}/spotify/play`, {
+    fetch('/spotify/play', {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,

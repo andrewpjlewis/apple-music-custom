@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import PlaylistTracks from './PlaylistTracks';
-import { API_BASE_URL } from '../api';
 
-export default function PlaylistGrid({ token, onTrackPlay }) {
+export default function PlaylistGrid({ token, onTrackPlay }) {  // Accept onTrackPlay here
   const [playlists, setPlaylists] = useState([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/spotify/playlists`, {
+    fetch('/spotify/playlists', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -15,6 +14,7 @@ export default function PlaylistGrid({ token, onTrackPlay }) {
   }, [token]);
 
   if (selectedPlaylist) {
+    // Pass onTrackPlay down to PlaylistTracks
     return <PlaylistTracks token={token} playlist={selectedPlaylist} onTrackPlay={onTrackPlay} />;
   }
 

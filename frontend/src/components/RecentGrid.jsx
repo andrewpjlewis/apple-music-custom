@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../api';
 
 export default function RecentGrid({ token, onTrackPlay }) {
   const [recent, setRecent] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/spotify/recently-played`, {
+    fetch('/spotify/recently-played', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.json())
@@ -13,7 +12,7 @@ export default function RecentGrid({ token, onTrackPlay }) {
   }, [token]);
 
   const handlePlay = (uri) => {
-    fetch(`${API_BASE_URL}/spotify/play`, {
+    fetch('/spotify/play', {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,

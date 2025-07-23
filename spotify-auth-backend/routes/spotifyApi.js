@@ -1,219 +1,135 @@
 const express = require('express');
-const fetch = require('node-fetch');
+const querystring = require('querystring');
+const axios = require('axios');
+const { generateRandomString } = require('../utils/spotifyUtils'); // Your helper function
 const router = express.Router();
-function getAccessTokenFromHeaders(req) {
-  const auth = req.headers.authorization || '';
-  return auth.startsWith('Bearer ') ? auth.slice(7) : null;
-}
 
-function requireAccessToken(req, res, next) {
-  const token = getAccessTokenFromHeaders(req);
-  if (!token) return res.status(401).json({ error: 'Missing access token' });
-  req.accessToken = token;
-  next();
-}
+const {
+  CLIENT_ID,
+  CLIENT_SECRET,
+  FRONTEND_URI,
+} = process.env;
 
-router.use(requireAccessToken);
+const REDIRECT_URI = 'https://apple-music-custom.onrender.com/callback';
 
-router.get('/playlists', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/playlists', {
-      headers: { Authorization: `Bearer ${req.accessToken}` },
-    });
+router.get('/login', (req, res) => {
+  const state = generateRandomString(16);
+  const scope = [
+    'streaming', 
+    'user-read-private',
+    'user-read-email',
+    'user-read-playback-state',
+    'user-modify-playback-state',
+    'user-library-read',
+    'playlist-read-private',
+    'playlist-modify-public',
+    'playlist-modify-private',
+    'user-read-currently-playing',
+    'user-read-recently-played',
+    'user-read-playback-position',
+    'user-top-read',
+  ].join(' ');
 
-    if (!response.ok) {
-      const text = await response.text(); // get raw text instead of json to see error message
-      console.error('Spotify Playlists API error (raw):', text);
-      return res.status(response.status).send(text);
-    }
+  const queryParams = querystring.stringify({
+    response_type: 'code',
+    client_id: CLIENT_ID,
+    scope,
+    redirect_uri: REDIRECT_URI,
+    state,
+  });
 
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error('Fetch /playlists failed:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+  res.redirect(`https://accounts.spotify.com/authorize?${queryParams}`);
 });
 
+router.get('/callback', async (req, res) => {
+  const code = req.query.code || null;
+  if (!code) return res.status(400).send('No code provided');
 
-router.get('/playlists/:id/tracks', async (req, res) => {
   try {
-    const response = await fetch(`https://api.spotify.com/v1/playlists/${req.params.id}/tracks`, {
-      headers: { Authorization: `Bearer ${req.accessToken}` },
-    });
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error('Playlist Tracks Error:', errData);
-      return res.status(response.status).json(errData);
-    }
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error('Fetch playlist tracks failed:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-router.get('/albums', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/albums', {
-      headers: { Authorization: `Bearer ${req.accessToken}` },
-    });
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error('Spotify Albums API error:', errData);
-      return res.status(response.status).json(errData);
-    }
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error('Fetch /albums failed:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-router.get('/recently-played', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/player/recently-played', {
-      headers: { Authorization: `Bearer ${req.accessToken}` },
-    });
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error('Spotify Recently Played API error:', errData);
-      return res.status(response.status).json(errData);
-    }
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error('Recently Played API Error:', err);
-    res.status(500).json({ error: 'Failed to fetch recently played' });
-  }
-});
-
-router.put('/play', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/player/play', {
-      method: 'PUT',
+    const tokenResponse = await axios({
+      method: 'post',
+      url: 'https://accounts.spotify.com/api/token',
+      data: querystring.stringify({
+        code,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code',
+      }),
       headers: {
-        Authorization: `Bearer ${req.accessToken}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization:
+          'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
       },
-      body: JSON.stringify(req.body),
     });
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error('Spotify Play API error:', errData);
-      return res.status(response.status).json(errData);
-    }
+
+    const { access_token, refresh_token, expires_in } = tokenResponse.data;
+
+    const queryParams = querystring.stringify({
+      access_token,
+      refresh_token,
+      expires_in,
+    });
+
+    res.redirect(`${FRONTEND_URI}/#${queryParams}`);
+  } catch (error) {
+    console.error('Spotify Token Error:', {
+      message: error.message,
+      responseData: error.response?.data,
+      status: error.response?.status,
+    });
+    res.status(500).send('Error retrieving Spotify tokens');
+  }
+});
+
+router.get('/refresh_token', async (req, res) => {
+  const refresh_token = req.query.refresh_token;
+  if (!refresh_token) return res.status(400).send('Missing refresh_token');
+
+  try {
+    const refreshResponse = await axios({
+      method: 'post',
+      url: 'https://accounts.spotify.com/api/token',
+      data: querystring.stringify({
+        grant_type: 'refresh_token',
+        refresh_token,
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization:
+          'Basic ' + Buffer.from(CLIENT_ID + ':' + CLIENT_SECRET).toString('base64'),
+      },
+    });
+
+    res.json(refreshResponse.data);
+  } catch (error) {
+    console.error('Refresh Token Error:', error.response?.data || error.message);
+    res.status(500).send('Failed to refresh token');
+  }
+});
+
+// PUT /spotify/play - play a track or context on user’s device
+router.put('/play', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  const { uris, context_uri } = req.body;
+
+  if (!uris && !context_uri) {
+    return res.status(400).json({ error: 'Missing uris or context_uri in request body' });
+  }
+
+  try {
+    await axios.put(
+      'https://api.spotify.com/v1/me/player/play',
+      uris ? { uris } : { context_uri },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
     res.status(204).send();
   } catch (err) {
-    console.error('Play failed:', err);
-    res.status(500).json({ error: 'Failed to start playback' });
-  }
-});
-
-// Pause playback
-router.put('/pause', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/player/pause', {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${req.accessToken}`,
-      },
-    });
-    res.sendStatus(response.status);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to pause playback' });
-  }
-});
-
-// Skip to next
-router.post('/next', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/player/next', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${req.accessToken}`,
-      },
-    });
-    res.sendStatus(response.status);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to skip track' });
-  }
-});
-
-// Skip to previous
-router.post('/previous', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/player/previous', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${req.accessToken}`,
-      },
-    });
-    res.sendStatus(response.status);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to go to previous track' });
-  }
-});
-
-// Set volume (0–100)
-router.put('/volume', async (req, res) => {
-  const volumePercent = req.query.volume_percent;
-  try {
-    const response = await fetch(`https://api.spotify.com/v1/me/player/volume?volume_percent=${volumePercent}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${req.accessToken}`,
-      },
-    });
-    res.sendStatus(response.status);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to change volume' });
-  }
-});
-
-router.put('/shuffle', async (req, res) => {
-  const { state } = req.query;
-  try {
-    const response = await fetch(`https://api.spotify.com/v1/me/player/shuffle?state=${state}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${req.accessToken}`, // use the middleware token
-      },
-    });
-    if (response.status === 204) {
-      res.sendStatus(204);
-    } else {
-      const data = await response.json();
-      res.status(response.status).json(data);
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.get('/player-state', async (req, res) => {
-  try {
-    const response = await fetch('https://api.spotify.com/v1/me/player', {
-      headers: {
-        Authorization: `Bearer ${req.accessToken}`,
-      },
-    });
-    if (response.status === 204) {
-      // No content means no active playback
-      return res.status(204).send();
-    }
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error('Spotify Player State API error:', errData);
-      return res.status(response.status).json(errData);
-    }
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    console.error('Fetch /player-state failed:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Play API Error:', err.response?.data || err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 

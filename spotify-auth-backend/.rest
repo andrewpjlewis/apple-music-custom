@@ -1,21 +1,111 @@
-# Test Spotify Playlists (replace YOUR_ACCESS_TOKEN)
+### Spotify Playlists (Production)
+GET https://apple-music-custom.onrender.com/spotify/playlists
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+###
+
+### Spotify Playlists (Local)
 GET http://localhost:8888/spotify/playlists
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ###
 
-# Test Spotify Albums
+### Spotify Albums (Production)
+GET https://apple-music-custom.onrender.com/spotify/albums
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+###
+
+### Spotify Albums (Local)
 GET http://localhost:8888/spotify/albums
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ###
 
-# Test Recently Played
+### Spotify Recently Played (Production)
+GET https://apple-music-custom.onrender.com/spotify/recently-played
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+###
+
+### Spotify Recently Played (Local)
 GET http://localhost:8888/spotify/recently-played
 Authorization: Bearer YOUR_ACCESS_TOKEN
 
 ###
 
-# Test Google Auth user info (needs session cookie)
+### Spotify Currently Playing (Production)
+GET https://apple-music-custom.onrender.com/spotify/currently-playing
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+###
+
+### Spotify Currently Playing (Local)
+GET http://localhost:8888/spotify/currently-playing
+Authorization: Bearer YOUR_ACCESS_TOKEN
+
+###
+
+### Spotify Play a Track or Context (Production)
+PUT https://apple-music-custom.onrender.com/spotify/play
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "uris": ["spotify:track:4iV5W9uYEdYUVa79Axb7Rh"]
+}
+
+###
+
+### Spotify Play a Track or Context (Local)
+PUT http://localhost:8888/spotify/play
+Authorization: Bearer YOUR_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "uris": ["spotify:track:4iV5W9uYEdYUVa79Axb7Rh"]
+}
+
+###
+
+### Refresh Spotify Token (Production)
+GET https://apple-music-custom.onrender.com/refresh_token?refresh_token=YOUR_REFRESH_TOKEN
+
+###
+
+### Refresh Spotify Token (Local)
+GET http://localhost:8888/refresh_token?refresh_token=YOUR_REFRESH_TOKEN
+
+###
+
+### Google Auth - Start Login (Production)
+GET https://apple-music-custom.onrender.com/auth/google
+
+###
+
+### Google Auth - Start Login (Local)
+GET http://localhost:8888/auth/google
+
+###
+
+### Google Auth - Get Logged-in User Info (Production)
+GET https://apple-music-custom.onrender.com/auth/user
+Cookie: connect.sid=YOUR_SESSION_COOKIE
+
+###
+
+### Google Auth - Get Logged-in User Info (Local)
 GET http://localhost:8888/auth/user
+Cookie: connect.sid=YOUR_SESSION_COOKIE
+
+###
+
+### Google Auth - Logout (Production)
+POST https://apple-music-custom.onrender.com/auth/logout
+Cookie: connect.sid=YOUR_SESSION_COOKIE
+
+###
+
+### Google Auth - Logout (Local)
+POST http://localhost:8888/auth/logout
 Cookie: connect.sid=YOUR_SESSION_COOKIE
